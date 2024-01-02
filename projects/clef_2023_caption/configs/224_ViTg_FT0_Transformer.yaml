@@ -1,0 +1,80 @@
+# Added by Yang B.
+model:
+  arch: blip2_transformer
+  load_pretrained: False
+  load_finetuned: False
+
+  # ViT settings
+  vit_precision: fp16
+  vit_model: eva_clip_g
+  freeze_vit: True
+  image_size: 224
+  vit_path: ./data/checkpoints/eva_vit_g.pth # comment this line for automatic download
+  
+  # Q-Former settings
+  num_query_token: 32
+  cross_attention_freq: 2
+  num_hidden_layers: 12
+  random_init: False
+  # bert_model: bert-base-uncased # download from huggingface
+  bert_model: ./data/checkpoints/bert-base-uncased/
+  
+  # Decoder settings
+  max_txt_len: 64   # max sequence length after padding during training
+
+
+datasets:    
+  clef_2023_caption:
+    vis_processor:
+        train:
+          name: "basic_image_train"
+          image_size: 224
+        eval:
+          name: "blip_image_eval"
+          image_size: 224
+    text_processor:
+        train:
+          name: "blip_caption"
+          prompt: ""
+        eval:
+          name: "blip_caption"
+          prompt: ""
+
+run:
+  task: clef_captioning
+  
+  # optimizer
+  lr_sched: "linear_warmup_cosine_lr"
+  init_lr: 1e-4
+  min_lr: 1e-5
+  warmup_lr: 1e-6
+  warmup_steps: 2000
+  weight_decay: 0.05
+  max_epoch: 10
+  batch_size_train: 6
+  batch_size_eval: 6
+  num_workers: 4
+
+  max_len: 120
+  min_len: 8
+  num_beams: 5
+  repetition_penalty: 2.0
+
+  seed: 42
+  output_dir: output/224_ViTg_FT0_Transformer
+
+  amp: True
+  resume_ckpt_path: null
+
+  evaluate: False
+  train_splits: ["train"]
+  valid_splits: ["val"]
+  # test_splits: ["test"]
+  val_gt_file: ./data/clef_2023_caption/val_gt.json
+  monitors: ["R-1"]
+
+  device: "cuda"
+  world_size: 1
+  dist_url: "env://"
+  distributed: True
+  report_metric: True

@@ -1,0 +1,42 @@
+# Added by Yang B.
+
+model:
+  arch: caption
+  load_finetuned: False
+  load_pretrained: False
+  pretrained: ""
+  finetuned: ""
+
+  # vit encoder
+  image_size: 224
+  drop_path_rate: 0
+  use_grad_checkpoint: False
+  vit_precision: "fp16"
+  freeze_vit: True
+
+  # Q-Former
+  num_query_token: 32
+
+  # ChatGLM
+  chatglm_model: "THUDM/chatglm-6b"
+  ## prepend to each caption during training and inference (occurred in model.forward and model.generate)
+  input_prompt: "Question: What is the radiology report for this image?\nAnswer:"
+  ## max sequence length after padding during training
+  max_txt_len: 64
+
+
+preprocess:
+    vis_processor:
+        train:
+          name: "blip_image_train"
+          image_size: 224
+        eval:
+          name: "blip_image_eval"
+          image_size: 224
+    text_processor:
+        train:
+          name: "blip_caption"
+          prompt: ""
+        eval:
+          name: "blip_caption"
+          prompt: ""
